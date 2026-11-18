@@ -81,8 +81,10 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
-DATABASE_URL = env("DATABASE_URL", default=None)
-if DATABASE_URL:
+# Database
+DATABASE_URL = (env("DATABASE_URL", default="") or "").strip().strip('"').strip("'")
+
+if DATABASE_URL.startswith(("postgres://", "postgresql://")):
     DATABASES = {
         'default': dj_database_url.parse(
             DATABASE_URL,
@@ -91,13 +93,14 @@ if DATABASE_URL:
         )
     }
 else:
+    if DATABASE_URL:
+        print("WARNING: ignoring invalid DATABASE_URL, starts with:", repr(DATABASE_URL[:12]))
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
             'NAME': BASE_DIR / 'db.sqlite3',
         }
     }
-
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
 
